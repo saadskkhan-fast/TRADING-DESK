@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 
 # --- 1. CONFIGURATION ---
 st.set_page_config(page_title="AI Trader", layout="wide")
-st.title("📈 AI Trading Agent (Gemini 2.0 Flash)")
+st.title("⚡️ AI Trading Agent (Fastest Stable Model)")
 
 # --- 2. SIDEBAR ---
 with st.sidebar:
@@ -16,9 +16,11 @@ with st.sidebar:
     api_key = st.text_input("Google API Key", type="password", help="Get free key at aistudio.google.com")
     ticker = st.text_input("Stock Ticker", value="NVDA").upper()
     run_btn = st.button("🚀 Run Analysis", type="primary")
-    st.info("Built with Streamlit & Gemini")
+    st.markdown("---")
+    st.caption("Powered by Gemini 1.5 Flash")
 
-# --- 3. DATA ENGINE ---
+# --- 3. DATA ENGINE (NOW WITH CACHING) ---
+@st.cache_data(ttl=3600)  # <--- CRITICAL FIX: Caches data for 1 hour to prevent bans
 def get_data(ticker):
     """Fetches data and handles the 'MultiIndex' bug automatically."""
     try:
@@ -48,15 +50,15 @@ def get_data(ticker):
             "news": "\n".join(headlines)
         }
     except Exception as e:
-        st.error(f"Error: {e}")
         return None
 
 # --- 4. APP LOGIC ---
 if run_btn and api_key:
+    # SWITCHED TO 1.5 FLASH FOR STABILITY & SPEED
     genai.configure(api_key=api_key)
-    model = genai.GenerativeModel('gemini-2.0-flash')
+    model = genai.GenerativeModel('gemini-1.5-flash')
     
-    with st.spinner(f"Analyzing {ticker}..."):
+    with st.spinner(f"⚡️ Blasting data to Gemini 1.5 Flash..."):
         data = get_data(ticker)
         
     if data:
@@ -76,16 +78,22 @@ if run_btn and api_key:
         
         # AI Debate
         st.divider()
-        st.subheader("🤖 AI Debate Room")
-        prompt = f"""
-        Analyze {ticker} (${data['price']}) with RSI {data['rsi']}.
-        NEWS: {data['news']}
+        st.subheader("🤖 The Debate Room")
         
-        Task:
-        1. Write a BULL argument (Why buy?).
-        2. Write a BEAR argument (Why sell?).
-        3. Give a Final Verdict (Buy/Sell/Hold) with a reason.
+        prompt = f"""
+        You are a Wall Street Veteran. Analyze {ticker} at ${data['price']} with RSI {data['rsi']}.
+        
+        LATEST NEWS:
+        {data['news']}
+        
+        TASK:
+        1. **The Bull Case** 🐮: Why is this going to the moon? (Cite news)
+        2. **The Bear Case** 🐻: Why is this a trap? (Cite risks)
+        3. **The Verdict** ⚖️: Buy, Sell, or Hold? Give a target price.
+        
+        Format beautifully with Markdown. Be fast and punchy.
         """
+        
         response = model.generate_content(prompt)
         st.markdown(response.text)
 
