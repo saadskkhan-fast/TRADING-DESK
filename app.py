@@ -56,7 +56,7 @@ def get_data(ticker):
 if run_btn and api_key:
     # SWITCHED TO 1.5 FLASH FOR STABILITY & SPEED
     genai.configure(api_key=api_key)
-    model = genai.GenerativeModel('gemini-1.5-flash')
+    model = genai.GenerativeModel('gemini-1.5-flash-latest')
     
     with st.spinner(f"⚡️ Blasting data to Gemini 1.5 Flash..."):
         data = get_data(ticker)
